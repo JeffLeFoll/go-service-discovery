@@ -1,7 +1,10 @@
 package ressources
 
 import (
+	"encoding/json"
 	"fmt"
+	"go-service-discovery/datastores"
+	"log"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -9,34 +12,49 @@ import (
 
 const endpoint = "/service"
 
-// Structure representing the Service endpoint
-type service struct{}
+//service Structure representing the Service endpoint
+type service struct {
+	dataStore datastores.ServiceDatastore
+}
 
 // NewServiceRessource provide a new instance of Service
 func NewServiceRessource() *service {
-	return &service{}
+	log.Println("NewServiceRessource")
+	return &service{datastores.NewServiceDatastore()}
 }
 
 // Register ressource's endpoint to the httprouter
 func (s *service) RegisterRessource(router *httprouter.Router) {
-	router.GET(endpoint, getAllServicesInstances)
-	router.GET(endpoint+"/:name", getServiceInstanceByName)
-	router.POST(endpoint, registerServiceInstance)
-	router.PUT(endpoint+"/:id", updateServiceInstance)
+	router.GET(endpoint, s.getAllServicesInstances)
+	router.GET(endpoint+"/:name", s.getServiceInstanceByName)
+	router.POST(endpoint, s.registerServiceInstance)
+	router.PUT(endpoint+"/:id", s.updateServiceInstance)
 }
 
-func getAllServicesInstances(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-	fmt.Fprint(w, "getAllServicesInstances ! ")
+func (s *service) getAllServicesInstances(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	instances := s.dataStore.GetAllServicesInstances()
+	json.NewEncoder(w).Encode(instances)
 }
 
-func getServiceInstanceByName(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-	fmt.Fprint(w, "getServiceInstanceByName ! "+params.ByName("name"))
+func (s *service) getServiceInstanceByName(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	instance := s.dataStore.GetServiceInstanceByName(params.ByName("name"))
+	json.NewEncoder(w).Encode(instance)
 }
 
-func registerServiceInstance(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-	fmt.Fprint(w, "registerServiceInstance ! ")
+func (s *service) registerServiceInstance(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	decoder := json.NewDecoder(r.Body)
+	var instance datastores.ServiceInstance
+	err := decoder.Decode(&instance)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Println("AddServiceInstance " + instance.Name)
+
+	s.dataStore.AddServiceInstance(instance)
+	w.WriteHeader(http.StatusOK)
 }
 
-func updateServiceInstance(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+func (s *service) updateServiceInstance(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	fmt.Fprint(w, "updateServiceInstance ! "+params.ByName("id"))
 }
