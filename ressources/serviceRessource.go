@@ -17,6 +17,7 @@ func NewServiceRessource() *service {
 	return &service{}
 }
 
+// Register ressource's endpoint to the httprouter
 func (s *service) RegisterRessource(router *httprouter.Router) {
 	router.GET(endpoint, getAllServicesInstances)
 	router.GET(endpoint+"/:name", getServiceInstanceByName)
