@@ -1,0 +1,3 @@
+package: go-service-discovery
+import:
+- package: github.com/julienschmidt/httprouter
