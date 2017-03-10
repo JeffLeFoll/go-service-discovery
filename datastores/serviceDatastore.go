@@ -1,12 +1,13 @@
 package datastores
 
-import "log"
+import "time"
 
 //ServiceInstance Structure representing a Service Instance
 type ServiceInstance struct {
-	ID   string
-	Name string
-	URL  string
+	ID                string
+	Name              string
+	URL               string
+	TimestampRegistry time.Time
 }
 
 // ServiceDatastore structure representing the datastore
@@ -16,7 +17,6 @@ type ServiceDatastore struct {
 
 // NewServiceDatastore provide a new instance of ServiceDatastore
 func NewServiceDatastore() ServiceDatastore {
-	log.Println("NewServiceDatastore")
 	return ServiceDatastore{make([]ServiceInstance, 0)}
 }
 
@@ -41,4 +41,20 @@ func (d *ServiceDatastore) GetAllServicesInstances() []ServiceInstance {
 //AddServiceInstance Add a new ServiceInstance in the datastore
 func (d *ServiceDatastore) AddServiceInstance(instance ServiceInstance) {
 	d.repository = append(d.repository, instance)
+}
+
+//RemoveServiceInstance Remove a service instance from the data store
+func (d *ServiceDatastore) RemoveServiceInstance(position int) {
+	d.repository = append(d.repository[:position], d.repository[position+1:]...)
+}
+
+//UpdateServiceInstance Add a new ServiceInstance in the datastore
+func (d *ServiceDatastore) UpdateServiceInstance(updatedInstance ServiceInstance) {
+
+	for position, instance := range d.repository {
+		if instance.ID == updatedInstance.ID {
+			d.repository[position] = updatedInstance
+			return
+		}
+	}
 }
