@@ -10,6 +10,7 @@ import (
 	"log"
 
 	"github.com/julienschmidt/httprouter"
+	uuid "github.com/satori/go.uuid"
 )
 
 const endpoint = "/service"
@@ -31,7 +32,7 @@ func (s *service) RegisterRessource(router *httprouter.Router) {
 	router.POST(endpoint, s.registerServiceInstance)
 	router.PUT(endpoint+"/:id", s.updateServiceInstance)
 
-	go doEvery(10*time.Minute, s.cleanUpDataStore)
+	go s.doEvery(1*time.Minute, s.cleanUpDataStore)
 }
 
 func (s *service) getAllServicesInstances(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
@@ -56,6 +57,12 @@ func (s *service) registerServiceInstance(w http.ResponseWriter, r *http.Request
 		instance.TimestampRegistry = time.Now()
 	}
 
+	u2, err := uuid.FromString(instance.ID)
+	if err != nil {
+		u2 = uuid.NewV4()
+	}
+	instance.ID = u2.String()
+
 	s.dataStore.AddServiceInstance(instance)
 	w.WriteHeader(http.StatusOK)
 }
@@ -75,20 +82,19 @@ func (s *service) updateServiceInstance(w http.ResponseWriter, r *http.Request, 
 }
 
 func (s *service) cleanUpDataStore() {
-	log.Println("Cleaning round")
 	instances := s.dataStore.GetAllServicesInstances()
 
 	for position, instance := range instances {
-		difference := instance.TimestampRegistry.Sub(time.Now())
+		difference := time.Now().Sub(instance.TimestampRegistry) / time.Second
 
 		if difference > 59 {
-			log.Printf("Cleaning instance ID: %s", instance.ID)
+			log.Printf("Cleaning instance ID: %s, Name: %s", instance.ID, instance.Name)
 			s.dataStore.RemoveServiceInstance(position)
 		}
 	}
 }
 
-func doEvery(d time.Duration, functionToExecute func()) {
+func (s *service) doEvery(d time.Duration, functionToExecute func()) {
 	for range time.Tick(d) {
 		functionToExecute()
 	}

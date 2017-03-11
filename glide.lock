@@ -1,6 +1,8 @@
-hash: 81f67b3d2748241bde69da4368785f79c120f188eed96831e4954f0864658604
-updated: 2017-03-07T14:35:07.8417938+01:00
+hash: 85567685fd917a8045b483984c877ada837a549851eabe74480c3cc0e20542aa
+updated: 2017-03-11T09:23:30.5315968+01:00
 imports:
 - name: github.com/julienschmidt/httprouter
   version: 8a45e95fc75cb77048068a62daed98cc22fdac7c
+- name: github.com/satori/go.uuid
+  version: 879c5887cd475cd7864858769793b2ceb0d44feb
 testImports: []
