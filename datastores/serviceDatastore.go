@@ -20,10 +20,22 @@ func NewServiceDatastore() ServiceDatastore {
 	return ServiceDatastore{make([]ServiceInstance, 0)}
 }
 
-// GetServiceInstanceByName return the Service Instance with the given name
-func (d *ServiceDatastore) GetServiceInstanceByName(name string) (instance ServiceInstance) {
+// GetServiceInstanceByName return all the Services Instances with the given name
+func (d *ServiceDatastore) GetServiceInstanceByName(name string) (instancesSelected []ServiceInstance) {
+	instancesSelected = make([]ServiceInstance, 0)
+
 	for _, instance := range d.repository {
 		if instance.Name == name {
+			instancesSelected = append(instancesSelected, instance)
+		}
+	}
+	return instancesSelected
+}
+
+// GetServiceInstanceByID return the Service Instance with the given id
+func (d *ServiceDatastore) GetServiceInstanceByID(id string) (instance ServiceInstance) {
+	for _, instance := range d.repository {
+		if instance.ID == id {
 			return instance
 		}
 	}
@@ -49,10 +61,10 @@ func (d *ServiceDatastore) RemoveServiceInstance(position int) {
 }
 
 //UpdateServiceInstance Add a new ServiceInstance in the datastore
-func (d *ServiceDatastore) UpdateServiceInstance(updatedInstance ServiceInstance) {
+func (d *ServiceDatastore) UpdateServiceInstance(id string, updatedInstance ServiceInstance) {
 
 	for position, instance := range d.repository {
-		if instance.ID == updatedInstance.ID {
+		if instance.ID == id {
 			d.repository[position] = updatedInstance
 			return
 		}

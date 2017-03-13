@@ -31,6 +31,7 @@ func (s *service) RegisterRessource(router *httprouter.Router) {
 	router.GET(endpoint+"/:name", s.getServiceInstanceByName)
 	router.POST(endpoint, s.registerServiceInstance)
 	router.PUT(endpoint+"/:id", s.updateServiceInstance)
+	router.DELETE(endpoint+"/:id", s.unRegisterServiceInstance)
 
 	go s.doEvery(1*time.Minute, s.cleanUpDataStore)
 }
@@ -42,6 +43,11 @@ func (s *service) getAllServicesInstances(w http.ResponseWriter, r *http.Request
 
 func (s *service) getServiceInstanceByName(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	instance := s.dataStore.GetServiceInstanceByName(params.ByName("name"))
+	json.NewEncoder(w).Encode(instance)
+}
+
+func (s *service) getServiceInstanceByID(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	instance := s.dataStore.GetServiceInstanceByID(params.ByName("name"))
 	json.NewEncoder(w).Encode(instance)
 }
 
@@ -77,8 +83,18 @@ func (s *service) updateServiceInstance(w http.ResponseWriter, r *http.Request, 
 
 	instance.TimestampRegistry = time.Now()
 
-	s.dataStore.UpdateServiceInstance(instance)
+	s.dataStore.UpdateServiceInstance(params.ByName("id"), instance)
 	w.WriteHeader(http.StatusOK)
+}
+
+func (s *service) unRegisterServiceInstance(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	instances := s.dataStore.GetAllServicesInstances()
+
+	for position, instance := range instances {
+		if instance.ID == params.ByName("id") {
+			s.dataStore.RemoveServiceInstance(position)
+		}
+	}
 }
 
 func (s *service) cleanUpDataStore() {

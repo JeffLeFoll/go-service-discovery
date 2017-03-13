@@ -1,6 +1,6 @@
 # go-service-discovery
-A naive implementation of the Service Discovery pattern in Go.  
-Store in-memory a list of service instance.  
+A simple implementation of the Service Discovery pattern in Go.  
+Store (in-memory) a list of service instance.  
 Every minute the server clean up service instance that are more than 59 seconds old.  
 
 ## Service instance
@@ -20,6 +20,8 @@ ID and TimestampRegistry are automatically set at creation time if not provided.
 ## Endpoints
 Currently the registry offer the following endpoints :  
 GET /service  => Return all services instances registered  
-GET /service/:name => Return services instances with the given name  
+GET /service/:name => Return a liste of services instances with the given name  
+GET /service/:id => Return the services instance with the given id  
 POST /service => register a new service instance, return the newly created ID or the provided ID if it's a valid UUID v4  
 PUT /service/:id => update the TimestampRegistry of an already existing service instance
+DELETE /service/:id => un-register the service instance with the given ID
