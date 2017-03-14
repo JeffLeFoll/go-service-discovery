@@ -23,5 +23,5 @@ GET /service  => Return all services instances registered
 GET /service/:name => Return a liste of services instances with the given name  
 GET /service/:id => Return the services instance with the given id  
 POST /service => register a new service instance, return the newly created ID or the provided ID if it's a valid UUID v4  
-PUT /service/:id => update the TimestampRegistry of an already existing service instance
+PUT /service/:id => update the TimestampRegistry of an already existing service instance  
 DELETE /service/:id => un-register the service instance with the given ID
